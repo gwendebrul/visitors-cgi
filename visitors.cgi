@@ -1,10 +1,20 @@
 #!/usr/bin/perl
 
+# this first use declaration is needed by my server to correctly function
+# comment out if needed
+# use cPanelUserConfig;
+
+# These next use declarations are standard
 use warnings;
 use strict;
+
+# The next use declaration must be downloaded (not standard)
 use CGI;
 
 my $q = CGI->new;
+
+# This prints the html header necessary for correct use of this script
+print $q->header;
 
 # Get ip address of the client connecting to this script
 my $ip = $ENV{REMOTE_ADDR};
@@ -17,7 +27,7 @@ my $is_unique = 1;
 my $ips_file = "./ips.txt";
 
 # contains the number of IP addresses in the 'ips.txt' file
-my $number_of_ips = 1;
+my $number_of_ips = 0;
 
 # This sets the '$is_test' variable to decide what to print
 my $is_test = $q->param('test') || 0;
@@ -26,10 +36,14 @@ my $is_test = $q->param('test') || 0;
 my $IPS;
 
 # open '$ips.txt' for reading
-open ($IPS, "<", $ips_file);
+my $file_opened = open ($IPS, "<", $ips_file);
 
-# This prints the html header necessary for correct use of this script
-print $q->header;
+# If there's an error opening the ips.txt file this should catch it
+if ($file_opened != 1) {
+	print "error opening file!<br> msessage: $! => $ips_file<br>";
+	print "If this is the first call of the visitors script then you have to create the file manually<br>";
+	exit(0);
+}
 
 # In this while loop the client's IP address is matched with any of the
 # IP addresses in the '$ips.txt' file.
@@ -40,14 +54,15 @@ while (<$IPS>) {
 	$number_of_ips++;
 }
 
-close ($IPS);
+close($IPS);
 
 # This next block is executed when an IP address is unique 
 # It appends the IP address to the 'ips.txt' file
 if ($is_unique) {
-	open($IPS, "+>>", $ips_file);
+	open $IPS, ">>", $ips_file;
 	print $IPS "$ip\n";	
 	close($IPS);
+	$number_of_ips++;
 }
 
 # if param 'test' is set to any value besides 0 the next few prints will be shown
