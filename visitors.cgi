@@ -2,7 +2,7 @@
 
 # this first use declaration is needed by my server to correctly function
 # comment out if needed
-# use cPanelUserConfig;
+#use cPanelUserConfig;
 
 # These next use declarations are standard
 use warnings;
@@ -35,13 +35,18 @@ my $is_test = $q->param('test') || 0;
 # The file handle for the '$ips.txt' file
 my $IPS;
 
+# check if file exists, if not create file
+unless (-e $ips_file) {
+	open $IPS, ">", $ips_file;
+	close($IPS);
+}
+
 # open '$ips.txt' for reading
 my $file_opened = open ($IPS, "<", $ips_file);
 
 # If there's an error opening the ips.txt file this should catch it
 if ($file_opened != 1) {
 	print "error opening file!<br> msessage: $! => $ips_file<br>";
-	print "If this is the first call of the visitors script then you have to create the file manually<br>";
 	exit(0);
 }
 
